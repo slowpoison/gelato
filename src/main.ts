@@ -9,7 +9,7 @@ class GelatoApp {
     this.window = new BrowserWindow({
       width: 300,
       height: 400,
-      show: false,
+      show: true,
       frame: false,
       resizable: false,
       webPreferences: {
