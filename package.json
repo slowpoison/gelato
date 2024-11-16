@@ -1,0 +1,37 @@
+{
+  "name": "gelato-taskbar",
+  "version": "1.0.0",
+  "description": "Gelato Taskbar App",
+  "main": "dist/main.js",
+  "scripts": {
+    "build-static": "cp -a public/* dist/",
+    "build": "tsc --outDir dist && pnpm run build-static",
+    "watch": "tsc -w --outDir dist",
+    "start": "pnpm run build && electron .",
+    "package": "pnpm run build && electron-builder"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/electron": "latest",
+    "@types/node": "latest",
+    "electron": "latest",
+    "electron-builder": "latest",
+    "typescript": "latest",
+    "ts-node": "latest"
+  },
+  "build": {
+    "appId": "com.gelato.app",
+    "files": [
+      "dist/**/*",
+      "src/icon.png",
+      "src/index.html"
+    ],
+    "mac": {
+      "category": "public.app-category.utilities"
+    },
+    "win": {
+      "target": "nsis"
+    }
+  }
+}
