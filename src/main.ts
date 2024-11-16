@@ -1,4 +1,4 @@
-import { app, BrowserWindow, Tray, Menu, nativeImage } from 'electron'
+import { app, BrowserWindow, Tray, Menu, nativeImage, ipcMain } from 'electron'
 import * as path from 'path'
 
 class GelatoApp {
@@ -7,10 +7,9 @@ class GelatoApp {
 
   private createWindow(): void {
     this.window = new BrowserWindow({
-      width: 300,
-      height: 400,
-      show: true,
+      show: false,
       frame: false,
+      useContentSize: true,
       resizable: false,
       webPreferences: {
         nodeIntegration: true,
@@ -19,6 +18,28 @@ class GelatoApp {
     })
 
     this.window.loadFile(path.join(__dirname, 'index.html'))
+    let window = this.window
+    this.window.webContents.on('did-finish-load', () => {
+      window.webContents.executeJavaScript(`
+        const body = document.body
+        const html = document.documentElement
+        const height = Math.max(
+          body.scrollHeight,
+          body.offsetHeight,
+          html.clientHeight,
+          html.scrollHeight,
+          html.offsetHeight
+        )
+        const width = Math.max(
+          body.scrollWidth,
+          body.offsetWidth,
+          html.clientWidth,
+          html.scrollWidth,
+          html.offsetWidth
+        )
+        require('electron').ipcRenderer.send('resize-window', { width, height })
+      `)
+    })
   }
 
   private createTray(): void {
@@ -29,10 +50,24 @@ class GelatoApp {
         console.error('Failed to load icon')
         return
       }
-      console.log('Loading icon :', icon)
+
       this.tray = new Tray(icon)
+      this.tray.setTitle('Gelato')
       this.tray.setToolTip('Gelato App')
+      this.tray.setIgnoreDoubleClickEvents(true)
+
+      // tray position
+      console.log('Tray position:', this.tray.getBounds())
+
       this.tray.setContextMenu(Menu.buildFromTemplate([
+        {
+          label: 'Gelato',
+          click: () => {
+            if (this.window) {
+              this.window.show()
+            }
+          }
+        },
         {
           label: 'Quit',
           click: () => {
@@ -40,20 +75,7 @@ class GelatoApp {
           }
         }
       ]))
-      this.tray.setTitle('Gelato App')
 
-      this.tray.on('click', (event, bounds) => {
-        if (!this.window) return
-
-        const { x, y } = bounds
-        
-        if (this.window.isVisible()) {
-          this.window.hide()
-        } else {
-          this.window.setPosition(x - 150, y)
-          this.window.show()
-        }
-      })
     } catch (error) {
       console.error('Failed to create tray:', error)
     }
@@ -65,6 +87,11 @@ class GelatoApp {
       this.createWindow()
       this.createTray()
     })
+
+    ipcMain.on('resize-window', (_, dimensions) => {
+      this.window?.setSize(dimensions.width, dimensions.height);
+      console.log('Resized window to:', dimensions)
+    });
 
     app.on('window-all-closed', () => {
       if (process.platform !== 'darwin') {
