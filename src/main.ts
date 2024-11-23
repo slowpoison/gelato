@@ -1,9 +1,14 @@
-import { app, BrowserWindow, Tray, Menu, nativeImage, ipcMain } from 'electron'
+import { app, BrowserWindow, ipcMain, Menu, nativeImage, Tray } from 'electron'
 import * as path from 'path'
+import Elgato from './elgato.js'
 
 class GelatoApp {
   private tray: Tray | null = null
   private window: BrowserWindow | null = null
+
+  public constructor() {
+    this.init()
+  }
 
   private createWindow(): void {
     this.window = new BrowserWindow({
@@ -102,4 +107,6 @@ class GelatoApp {
 }
 
 const gelatoApp = new GelatoApp()
-gelatoApp.init()
+const elgato = Elgato.get()
+
+
