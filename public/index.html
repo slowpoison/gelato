@@ -23,9 +23,13 @@
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
         }
         .header {
+            -webkit-app-region: drag;
             display: flex;
             justify-content: space-between;
             align-items: center;
+        }
+        #closeButton {
+            -webkit-app-region: no-drag;
         }
         .header img {
             width: 20px;
@@ -83,20 +87,21 @@
 <body>
     <div class="control-center">
         <div class="header">
-            <img src="power.svg" alt="Power Icon">
-            <div class="title">Elgato Key Light</div>
-            <img src="settings.svg" alt="Settings Icon">
+            <img src="power.svg" alt="Power">
+            <span class="title" style="display: flex; align-items: center;">Elgato Key Light  <img src="settings.svg" alt="Settings" style="vertical-align: middle;"></span>
+            </span>
+            <img src="close.svg" alt="Close" id="closeButton">
         </div>
         <div class="slider-container">
             <div class="slider disabled">
-                <span class="icon">🌡️</span>
+                <span class="icon">️🧊</span>
                 <input type="range" min="0" max="100" value="50">
                 <span class="icon">🔥</span>
             </div>
             <div class="slider disabled">
-                <span class="icon">☀️</span>
-                <input type="range" min="0" max="100" value="50">
                 <span class="icon">🔆</span>
+                <input type="range" min="0" max="100" value="50">
+                <span class="icon">☀️</span>
             </div>
         </div>
     </div>
@@ -129,7 +134,13 @@
             100% { transform: rotate(360deg); }
         }
     </style>
-    <script type="javascript">
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            const closeButton = document.getElementById('closeButton');
+            closeButton.addEventListener('click', () => {
+                window.close();
+            });
+        });
         function toggleSliders(isDisabled) {
             const sliders = document.querySelectorAll('.slider');
             sliders.forEach(slider => {

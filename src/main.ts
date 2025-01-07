@@ -12,38 +12,36 @@ class GelatoApp {
 
   private createWindow(): void {
     this.window = new BrowserWindow({
-      show: false,
+      width: 300,  // Initial size, will be adjusted
+      height: 200,
+      show: false, // Hide until we get correct dimensions
       frame: false,
-      useContentSize: true,
-      resizable: false,
+      resizable: true,
       webPreferences: {
         nodeIntegration: true,
         contextIsolation: false
       }
     })
 
+    this.window.on('close', (event) => {
+      event.preventDefault()
+      this.window?.hide()
+    })
+
     this.window.loadFile(path.join(__dirname, 'index.html'))
     let window = this.window
     this.window.webContents.on('did-finish-load', () => {
       window.webContents.executeJavaScript(`
-        const body = document.body
-        const html = document.documentElement
-        const height = Math.max(
-          body.scrollHeight,
-          body.offsetHeight,
-          html.clientHeight,
-          html.scrollHeight,
-          html.offsetHeight
-        )
-        const width = Math.max(
-          body.scrollWidth,
-          body.offsetWidth,
-          html.clientWidth,
-          html.scrollWidth,
-          html.offsetWidth
-        )
-        require('electron').ipcRenderer.send('resize-window', { width, height })
+        const body = document.querySelector('.control-center')
+        const width = body.offsetWidth
+        const height = body.offsetHeight
+        require('electron').ipcRenderer.send('resize-window', { 
+          width: width + 30, // Add padding
+          height: height
+        })
       `)
+      window.show()
+      // window.webContents.openDevTools()
     })
   }
 
@@ -76,6 +74,7 @@ class GelatoApp {
         {
           label: 'Quit',
           click: () => {
+            this.window?.destroy();
             app.quit()
           }
         }
@@ -94,9 +93,9 @@ class GelatoApp {
     })
 
     ipcMain.on('resize-window', (_, dimensions) => {
-      this.window?.setSize(dimensions.width, dimensions.height);
-      console.log('Resized window to:', dimensions)
-    });
+      this.window?.setSize(dimensions.width, dimensions.height)
+      this.window?.setResizable(false)
+    })
 
     app.on('window-all-closed', () => {
       if (process.platform !== 'darwin') {

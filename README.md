@@ -2,6 +2,10 @@
 
 A simple tray-based application for controlling Key Light.
 
+Limitations:
+- Only designed to handle a single key light device. If multiple devices are found, the first one will be used.
+- Doesn't support the comprehensive set of Key Light features.
+
 ## Features
 
 Turn Key Light on or off
